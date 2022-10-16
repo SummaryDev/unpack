@@ -3,7 +3,8 @@ Utility to unpack call data by ABI
 
 WARNING: no logic yet, just plumbing!!!
 
-1) Setup environment variable: \n
+1) Setup environment variable:
+
     PG_DBNAME
 
 2) To create test tables in Postgres and import test data:
