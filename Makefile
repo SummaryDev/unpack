@@ -11,7 +11,7 @@ SRCS_EXT = pg-func.c
 OBJS_EXT = $(SRCS_EXT:.c=.o)
 PG_MOD=$(shell pwd)/$(TARGET_EXT)
 
-# GO static library
+# GO static library without wildcard
 TARGET_LIB = libunpack.a
 SRCS_LIB = libunpack.go
 
