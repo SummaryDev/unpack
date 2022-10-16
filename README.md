@@ -6,17 +6,22 @@ WARNING: no logic yet, just plumbing!!!
 1) Setup environment variable: \n
     PG_DBNAME
 
-2) To create test tables in Postgres and import test data: \n
+2) To create test tables in Postgres and import test data:
+
     make install-db
 
-3) To build go library, C shared object and link them: \n
+3) To build go library, C shared object and link them:
+
     make
 
-4) To install function unpack into Postgres: \n
+4) To install function unpack into Postgres:
+
     make install
 
-5) To test function unpack: \n
-    psql -d YOUR-DB-NAME -U postgres \n
-    select unpack(address) from abi; \n
+5) To test function unpack:
+
+    psql -d YOUR-DB-NAME -U postgres
+
+    select unpack(address) from abi;
 
     (This will just output all addresses and write some debug into postgres log file, look for postgresql.log location and tail it)
