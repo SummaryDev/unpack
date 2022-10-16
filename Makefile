@@ -13,7 +13,7 @@ PG_MOD=$(shell pwd)/$(TARGET_EXT)
 
 # GO static library
 TARGET_LIB = libunpack.a
-SRCS_LIB = $(wildcard *.go)
+SRCS_LIB = libunpack.go
 
 .PHONY: all
 all: $(TARGET_LIB) $(TARGET_EXT)
