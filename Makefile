@@ -13,7 +13,7 @@ RM = rm -f
 TARGET_EXT = pg-func.so
 SRCS_EXT = pg-func.c
 OBJS_EXT = $(SRCS_EXT:.c=.o)
-PG_MOD=$(env pwd)/$(TARGET_EXT)
+PG_MOD=$(PWD)/$(TARGET_EXT)
 
 # GO static library without wildcard
 TARGET_LIB = libunpack.a
@@ -32,10 +32,10 @@ $(SRCS_EXT:.c=.d):%.d:%.c
 	$(CC) $(CFLAGS) -MM $< >$@
 
 install: $(PG_MOD)
-	psql $(PG_DBNAME) --set=MOD=\'$(PG_MOD)\' -f install-func.sql
+	psql --set=MOD=\'$(PG_MOD)\' -f install-func.sql
 
 install-db:
-	psql $(PG_DBNAME) -f setup-db.sql
+	psql -f setup-db.sql
 
 .PHONY: clean
 clean:
