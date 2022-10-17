@@ -1,12 +1,18 @@
 CC = gcc
 GOCMD=go
 GOBUILD=$(GOCMD) build
+UNAME=$(shell uname)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
-INCLUDE_DIR=$(shell pg_config --includedir-server)
 CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
-LDFLAGS = -shared -lpthread -L$(LIB_DIR)
+
+ifeq ($(UNAME),Darwin)
+	LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(LIB_DIR) -bundle_loader $(BIN_DIR)/postgres
+else
+	LDFLAGS = -shared -lpthread -L$(LIB_DIR)
+endif
+
 RM = rm -f
 
 # C shared object
