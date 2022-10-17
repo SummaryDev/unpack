@@ -5,7 +5,6 @@ UNAME=$(shell uname)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
-INCLUDE_DIR=$(shell pg_config --includedir-server)
 CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
 
 ifeq ($(UNAME),Darwin)
