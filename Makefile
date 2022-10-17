@@ -6,7 +6,7 @@ LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
-LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(LIB_DIR) -bundle_loader $(BIN_DIR)/postgres
+LDFLAGS = -shared -lpthread -L$(LIB_DIR)
 RM = rm -f
 
 # C shared object
