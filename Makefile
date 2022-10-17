@@ -2,10 +2,10 @@ CC = gcc
 GOCMD=go
 GOBUILD=$(GOCMD) build
 UNAME=$(shell uname)
-CURR_DIR=$(shell pwd)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
+INCLUDE_DIR=$(shell pg_config --includedir-server)
 CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
 
 ifeq ($(UNAME),Darwin)
@@ -20,7 +20,7 @@ RM = rm -f
 TARGET_EXT = pg-func.so
 SRCS_EXT = pg-func.c
 OBJS_EXT = $(SRCS_EXT:.c=.o)
-PG_MOD=$(CURR_DIR)/$(TARGET_EXT)
+PG_MOD=$(PWD)/$(TARGET_EXT)
 
 # GO static library without wildcard
 TARGET_LIB = libunpack.a
@@ -39,10 +39,10 @@ $(SRCS_EXT:.c=.d):%.d:%.c
 	$(CC) $(CFLAGS) -MM $< >$@
 
 install: $(PG_MOD)
-	psql $(PG_DBNAME) --set=MOD=\'$(PG_MOD)\' -f install-func.sql
+	psql --set=MOD=\'$(PG_MOD)\' -f install-func.sql
 
 install-db:
-	psql $(PG_DBNAME) -f setup-db.sql
+	psql -f setup-db.sql
 
 .PHONY: clean
 clean:
