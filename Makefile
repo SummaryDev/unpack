@@ -1,15 +1,19 @@
 CC = gcc
 GOCMD=go
 GOBUILD=$(GOCMD) build
-CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(shell pg_config --includedir-server)
-LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(shell pg_config --libdir) -bundle_loader $(shell pg_config --bindir)/postgres
+INCLUDE_DIR=$(shell pg_config --includedir-server)
+LIB_DIR=$(shell pg_config --libdir)
+BIN_DIR=$(shell pg_config --bindir)
+INCLUDE_DIR=$(shell pg_config --includedir-server)
+CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
+LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(LIB_DIR) -bundle_loader $(BIN_DIR)/postgres
 RM = rm -f
 
 # C shared object
 TARGET_EXT = pg-func.so
 SRCS_EXT = pg-func.c
 OBJS_EXT = $(SRCS_EXT:.c=.o)
-PG_MOD=$(shell pwd)/$(TARGET_EXT)
+PG_MOD=$(env pwd)/$(TARGET_EXT)
 
 # GO static library without wildcard
 TARGET_LIB = libunpack.a
