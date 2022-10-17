@@ -9,7 +9,7 @@ PG_FUNCTION_INFO_V1(unpack);
 
 Datum unpack(PG_FUNCTION_ARGS)
 {
-  text *string;
+  text *abi;
 
   // Get arguments.  If we declare our function as STRICT, then
   // this check is superfluous.
@@ -17,12 +17,14 @@ Datum unpack(PG_FUNCTION_ARGS)
     PG_RETURN_NULL();
   }
 
-  string = PG_GETARG_TEXT_P_COPY(0);
+  // must have all three arguments
 
-  int stringSize = VARSIZE_ANY_EXHDR(string);
-  printf("Size is %d, string is: %s\n", stringSize, VARDATA(string));
+  // abi
+  abi = PG_GETARG_TEXT_P_COPY(0);
+  int abiSize = VARSIZE_ANY_EXHDR(abi);
+  printf("Size is %d, string is: %s\n", abiSize, VARDATA(abi));
 
-  ProcessLog((char *)VARDATA(string));
+  ProcessLog((char *)VARDATA(abi));
 
-  PG_RETURN_TEXT_P(string);
+  PG_RETURN_TEXT_P(abi);
 }

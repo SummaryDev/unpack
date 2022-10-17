@@ -1,19 +1,26 @@
 CC = gcc
 GOCMD=go
 GOBUILD=$(GOCMD) build
+UNAME=$(shell uname)
+CURR_DIR=$(shell pwd)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
-INCLUDE_DIR=$(shell pg_config --includedir-server)
 CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
-LDFLAGS = -shared -lpthread -L$(LIB_DIR)
+
+ifeq ($(UNAME),Darwin)
+	LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(LIB_DIR) -bundle_loader $(BIN_DIR)/postgres
+else
+	LDFLAGS = -shared -lpthread -L$(LIB_DIR)
+endif
+
 RM = rm -f
 
 # C shared object
 TARGET_EXT = pg-func.so
 SRCS_EXT = pg-func.c
 OBJS_EXT = $(SRCS_EXT:.c=.o)
-PG_MOD=$(env pwd)/$(TARGET_EXT)
+PG_MOD=$(CURR_DIR)/$(TARGET_EXT)
 
 # GO static library without wildcard
 TARGET_LIB = libunpack.a
