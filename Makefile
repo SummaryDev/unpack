@@ -26,7 +26,7 @@ TARGET_LIB = libunpack.a
 SRCS_LIB = libunpack.go
 
 .PHONY: all
-all: $(TARGET_LIB) $(TARGET_EXT)
+all: clean $(TARGET_LIB) $(TARGET_EXT) install
 
 $(TARGET_LIB): $(SRCS_LIB)
 	$(GOBUILD) -buildmode=c-archive -o $(TARGET_LIB) $(SRCS_LIB)

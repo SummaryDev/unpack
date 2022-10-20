@@ -1,7 +1,7 @@
 # unpack
 Utility to unpack call data by ABI
 
-WARNING: no logic yet, just plumbing!!!
+WARNING: Inputs are written to log file for now. Make sure to run make install-db (fixed some .csv files)
 
 1. Setup environment variables to connect to your Postgres db with
    `psql`:
@@ -33,7 +33,11 @@ psql
 Execute SQL:
 
 ```sql
-select unpack(address) from abi;
+select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39';
+
+select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a';
+
+select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1';
 ```
 
 This will just output all addresses and write some debug into postgres

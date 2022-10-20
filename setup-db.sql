@@ -1,3 +1,6 @@
+DROP TABLE logs;
+DROP TABLE abi;
+
 CREATE TABLE IF NOT EXISTS abi (
 	"address" TEXT PRIMARY KEY,
 	abi TEXT
