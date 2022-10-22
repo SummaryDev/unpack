@@ -76,7 +76,15 @@ Datum unpack(PG_FUNCTION_ARGS)
   }
 
   // Go doesn't accept arrays - for now passing all four topics separately
-  ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3]);
+  int numParams;
+  Param **params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
+  
+  for (int i = 0; i < numParams; i++) {
+    Param *param = *(params + i);
+
+    ereport(LOG, (errmsg("ProcessLog returned - Name: %s, Type: %s, Value: %s, index: %d", param->Name, param->Type, 
+    param->Value, i)));
+  }
 
   // temp return data
   PG_RETURN_TEXT_P(data);

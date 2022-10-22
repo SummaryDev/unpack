@@ -1,17 +1,30 @@
 package main
 
+/*
+typedef struct {
+	char *Name;
+	char *Type;
+	char *Value;
+} Param;
+*/
 import "C"
 import (
 	"encoding/hex"
+	"fmt"
 	"log"
 	"strings"
+	"unsafe"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )
 
 //export  ProcessLog
-func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char, inTopic2 *C.char, inTopic3 *C.char) {
+func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char,
+	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.Param {
+
+	// init the number of returned params
+	*numParams = 0
 
 	// abi
 	abiString := C.GoString(inAbi)
@@ -19,39 +32,42 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	contractABI, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
 		log.Printf("Error processing abi\n")
+		return nil
 	}
 	log.Printf("From go ProcessLog Num abi events: %d\n", len(contractABI.Events))
+
+	// array of inputs from topics
+	var topicsInputs [3]string
+	var topicsNum = 0
 
 	// topics0 - this is the Event Sig hashed with Keccak256
 	topic0 := C.GoString(inTopic0)
 	log.Printf("From go ProcessLog topic0: %s, Size: %d\n", topic0, len(topic0))
-	//topic0Clean := fromHex(topic0)
-	//log.Printf("From go ProcessLog clean topic0: %s, Size: %d\n", topic0Clean, len(topic0Clean))
-	//topic0Hex, _ := hex.DecodeString(topic0Clean)
 
 	// topics1
 	topic1 := C.GoString(inTopic1)
-	log.Printf("From go ProcessLog topic1: %s, Size: %d\n", topic1, len(topic1))
-	topic1Clean := fromHex(topic1)
-	log.Printf("From go ProcessLog clean topic1: %s, Size: %d\n", topic1Clean, len(topic1Clean))
+	if len(topic1) > 0 {
+		log.Printf("From go ProcessLog topic1: %s, Size: %d\n", topic1, len(topic1))
+		topicsInputs[0] = topic1
+		topicsNum++
+	}
 
 	// topics2
 	topic2 := C.GoString(inTopic2)
-	log.Printf("From go ProcessLog topic2: %s, Size: %d\n", topic2, len(topic2))
-	topic2Clean := fromHex(topic2)
-	log.Printf("From go ProcessLog clean topic2: %s, Size: %d\n", topic2Clean, len(topic2Clean))
+	if len(topic2) > 0 {
+		log.Printf("From go ProcessLog topic2: %s, Size: %d\n", topic2, len(topic2))
+		topicsInputs[1] = topic2
+		topicsNum++
+	}
 
 	// topics3
 	topic3 := C.GoString(inTopic3)
-	log.Printf("From go ProcessLog topic3: %s, Size: %d\n", topic3, len(topic3))
-	topic3Clean := fromHex(topic3)
-	log.Printf("From go ProcessLog clean topic3: %s, Size: %d\n", topic3Clean, len(topic3Clean))
-
-	// array of inputs from topics
-	var topicsInputs [3]string
-	topicsInputs[0] = topic1Clean
-	topicsInputs[1] = topic2Clean
-	topicsInputs[2] = topic3Clean
+	if len(topic3) > 0 {
+		log.Printf("From go ProcessLog topic3: %s, Size: %d\n", topic3, len(topic3))
+		topicsInputs[2] = topic3
+		topicsNum++
+	}
+	log.Printf("From go ProcessLog Number of topic inputs is %d\n", topicsNum)
 
 	// data
 	data := C.GoString(inData)
@@ -63,14 +79,14 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// get the matching event from abi using the hash in topics[0]
 	eventStruct, err := contractABI.EventByID(common.HexToHash(topic0))
 	if err != nil {
-		return
+		return nil
 	}
 	log.Printf("From go ProcessLog EventByID found event: %s\n", eventStruct.Name)
 
 	// return empty result if anonymous event
 	if eventStruct.Anonymous == true {
 		log.Printf("From go ProcessLog Event is anonymous: %t, cannot unpack\n", eventStruct.Anonymous)
-		return
+		return nil
 	} else {
 		log.Printf("From go ProcessLog Event is anonymous: %t\n", eventStruct.Anonymous)
 	}
@@ -83,24 +99,52 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	dataInputs, err := contractABI.Unpack(eventStruct.Name, dataHex)
 	if err != nil {
 		log.Printf("From go ProcessLog Error unpacking log data\n")
+		return nil
 	}
 	dataInputsNum := len(dataInputs)
 	log.Printf("From go ProcessLog Number of Log data items is: %d\n", dataInputsNum)
 
+	// go slice to hold input parameters
+	params := make([](*C.Param), numInputs)
+
 	// loop through all the inputs
 	topicIndex := 0
 	dataIndex := 0
-	for _, input := range eventStruct.Inputs {
+	for i, input := range eventStruct.Inputs {
+		param := C.Param{}
+
+		param.Name = C.CString(input.Name)
+		param.Type = C.CString(input.Type.String())
+
+		var value interface{}
 
 		// indexed from topics, non-indexed from data
 		if input.Indexed {
 			log.Printf("From go ProcessLog Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, topicsInputs[topicIndex])
+			value = topicsInputs[topicIndex]
 			topicIndex++
 		} else {
 			log.Printf("From go ProcessLog NON-Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, dataInputs[dataIndex])
+			value = dataInputs[dataIndex]
 			dataIndex++
 		}
+
+		// send all values as strings
+		param.Value = C.CString(fmt.Sprintf("%v", value))
+		params[i] = &param
 	}
+
+	// set num params
+	*numParams = C.int(len(params))
+
+	// convert go slice to C pointer array
+	ret := C.malloc(C.size_t(len(params)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	pRet := (*[1<<30 - 1]*C.Param)(ret)
+
+	for i, item := range params {
+		pRet[i] = item
+	}
+	return (**C.Param)(ret)
 }
 
 // FromHex returns the bytes represented by the hexadecimal string s.
