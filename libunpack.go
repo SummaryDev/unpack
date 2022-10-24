@@ -5,7 +5,7 @@ typedef struct {
 	char *Name;
 	char *Type;
 	char *Value;
-} Param;
+} InputParam;
 */
 import "C"
 import (
@@ -21,7 +21,7 @@ import (
 
 //export  ProcessLog
 func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char,
-	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.Param {
+	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.InputParam {
 
 	// init the number of returned params
 	*numParams = 0
@@ -105,13 +105,13 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	log.Printf("From go ProcessLog Number of Log data items is: %d\n", dataInputsNum)
 
 	// go slice to hold input parameters
-	params := make([](*C.Param), numInputs)
+	params := make([](*C.InputParam), numInputs)
 
 	// loop through all the inputs
 	topicIndex := 0
 	dataIndex := 0
 	for i, input := range eventStruct.Inputs {
-		param := C.Param{}
+		param := C.InputParam{}
 
 		param.Name = C.CString(input.Name)
 		param.Type = C.CString(input.Type.String())
@@ -139,12 +139,12 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 
 	// convert go slice to C pointer array
 	ret := C.malloc(C.size_t(len(params)) * C.size_t(unsafe.Sizeof(uintptr(0))))
-	pRet := (*[1<<30 - 1]*C.Param)(ret)
+	pRet := (*[1<<30 - 1]*C.InputParam)(ret)
 
 	for i, item := range params {
 		pRet[i] = item
 	}
-	return (**C.Param)(ret)
+	return (**C.InputParam)(ret)
 }
 
 // FromHex returns the bytes represented by the hexadecimal string s.

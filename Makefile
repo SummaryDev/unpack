@@ -5,7 +5,7 @@ UNAME=$(shell uname)
 INCLUDE_DIR=$(shell pg_config --includedir-server)
 LIB_DIR=$(shell pg_config --libdir)
 BIN_DIR=$(shell pg_config --bindir)
-CFLAGS = -Wall -Wextra -O2 -g -I. -I./ -I$(INCLUDE_DIR)
+CFLAGS = -Wall -O2 -g -I. -I./ -I$(INCLUDE_DIR)
 
 ifeq ($(UNAME),Darwin)
 	LDFLAGS = -bundle -multiply_defined suppress -lpthread -L$(LIB_DIR) -bundle_loader $(BIN_DIR)/postgres

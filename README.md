@@ -33,6 +33,8 @@ psql
 Execute SQL:
 
 ```sql
+select logs.log_index, unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address;
+
 select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39';
 
 select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a';
