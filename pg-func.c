@@ -15,15 +15,6 @@ Datum unpack(PG_FUNCTION_ARGS)
   const int MAX_TOPIC_SIZE = 66;
   const int MAX_NUM_TOPICS = 4;
 
-  //TODO: find a better way to catch this and return. Causes seg fault sometimes. 
-  // check if we have abi
-  /*
-  if( PG_ARGISNULL(0) ) {
-    ereport(WARNING, (errmsg("Error: abi is null")));
-    PG_RETURN_NULL();
-  } 
-  */
-
   // TODO: check when data and topics are null and decide what to do
 
   FuncCallContext *funcctx;
