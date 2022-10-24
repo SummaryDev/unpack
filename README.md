@@ -1,14 +1,21 @@
 # unpack
-Utility to unpack call data by ABI
+
+Utility to unpack call data with smart contract ABI.
 
 WARNING: Inputs are written to log file for now. Make sure to run make install-db (fixed some .csv files)
 
 1. Setup environment variables to connect to your Postgres db with
    `psql`:
 
-- PGDATABASE
 - PGUSER
 - PGPASSWORD
+- PGDATABASE if not using the default
+
+For example:
+
+```bash
+export PGUSER=postgres && export PGPASSWORD=postgres
+```
 
 2. To create test tables in Postgres and import test data:
 
@@ -22,13 +29,9 @@ WARNING: Inputs are written to log file for now. Make sure to run make install-d
 
     make install
 
-5. To test the new function `unpack` that was built and installed:
+5. To test Postgres function `unpack` that we just built and installed:
 
-Open the interactive shell to Postgres:
-
-```bash
-psql
-```
+Start the interactive shell `psql`.
 
 Execute SQL:
 
@@ -45,11 +48,13 @@ select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.
 This will just output all addresses and write some debug into postgres
 log file, look for postgresql.log location and tail it:
 
+For example:
+
 ```bash
 tail -f /var/log/postgresql/postgresql-12-main.log
 ```
 
-To see debug output from our function:
+Observe debug output from our function:
 
 ```
 2022/10/17 17:46:20 From go function: 0x8007aa43792a392b221dc091bdb2191e5ff626d1
