@@ -31,7 +31,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
     if( PG_ARGISNULL(0) ) {
-      ereport(WARNING, (errmsg("Error: abi is null")));
+      ereport(LOG, (errmsg("Error: abi is null")));
       SRF_RETURN_DONE(funcctx);
     } 
 
@@ -132,14 +132,16 @@ Datum unpack(PG_FUNCTION_ARGS)
     ereport(LOG, (errmsg("IN LOOP 0, call_cntr: %d, max_call: %d, param name: %s, param size: %lu",
           call_cntr,  max_calls, param->Name, strlen(param->Name))));
 
-    values = (char **) palloc(3 * sizeof(char *));
-    values[0] = (char *) palloc((strlen(param->Name)+1) * sizeof(char));
-    values[1] = (char *) palloc((strlen(param->Type)+1) * sizeof(char));
-    values[2] = (char *) palloc((strlen(param->Value)+1) * sizeof(char));
+    values = (char **) palloc(4 * sizeof(char *));
+    values[0] = (char *) palloc((strlen(param->Event)+1) * sizeof(char));
+    values[1] = (char *) palloc((strlen(param->Name)+1) * sizeof(char));
+    values[2] = (char *) palloc((strlen(param->Type)+1) * sizeof(char));
+    values[3] = (char *) palloc((strlen(param->Value)+1) * sizeof(char));
 
-    strcpy(values[0], param->Name);
-    strcpy(values[1], param->Type);
-    strcpy(values[2], param->Value);
+    strcpy(values[0], param->Event);
+    strcpy(values[1], param->Name);
+    strcpy(values[2], param->Type);
+    strcpy(values[3], param->Value);
 
     tuple = BuildTupleFromCStrings(attinmeta, values);
     result = HeapTupleGetDatum(tuple);
