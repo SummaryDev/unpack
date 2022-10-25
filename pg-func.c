@@ -15,7 +15,6 @@ Datum unpack(PG_FUNCTION_ARGS)
   const int MAX_TOPIC_SIZE = 66;
   const int MAX_NUM_TOPICS = 4;
 
-  // TODO: check when data and topics are null and decide what to do
 
   FuncCallContext *funcctx;
   TupleDesc tupdesc;
@@ -35,6 +34,8 @@ Datum unpack(PG_FUNCTION_ARGS)
       ereport(WARNING, (errmsg("Error: abi is null")));
       SRF_RETURN_DONE(funcctx);
     } 
+
+    // TODO: check when data and topics are null and decide what to do
 
     // get the args
     // abi

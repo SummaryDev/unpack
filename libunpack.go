@@ -31,24 +31,24 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	log.Printf("From go ProcessLog abi: %s, Size: %d\n", abiString, len(abiString))
 	contractABI, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
-		log.Printf("Error processing abi\n")
+		log.Printf("From go ProcessLog Error processing abi\n")
 		return nil
 	}
 	log.Printf("From go ProcessLog Num abi events: %d\n", len(contractABI.Events))
-
-	// array of inputs from topics
-	var topicsInputs [3]string
-	var topicsNum = 0
 
 	// topics0 - this is the Event Sig hashed with Keccak256
 	topic0 := C.GoString(inTopic0)
 	log.Printf("From go ProcessLog topic0: %s, Size: %d\n", topic0, len(topic0))
 
+	// inputs from topics as hashes
+	topicHashes := make([]common.Hash, 0, 3)
+	var topicsNum = 0
+
 	// topics1
 	topic1 := C.GoString(inTopic1)
 	if len(topic1) > 0 {
 		log.Printf("From go ProcessLog topic1: %s, Size: %d\n", topic1, len(topic1))
-		topicsInputs[0] = topic1
+		topicHashes = append(topicHashes, common.HexToHash(topic1))
 		topicsNum++
 	}
 
@@ -56,7 +56,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	topic2 := C.GoString(inTopic2)
 	if len(topic2) > 0 {
 		log.Printf("From go ProcessLog topic2: %s, Size: %d\n", topic2, len(topic2))
-		topicsInputs[1] = topic2
+		topicHashes = append(topicHashes, common.HexToHash(topic2))
 		topicsNum++
 	}
 
@@ -64,7 +64,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	topic3 := C.GoString(inTopic3)
 	if len(topic3) > 0 {
 		log.Printf("From go ProcessLog topic3: %s, Size: %d\n", topic3, len(topic3))
-		topicsInputs[2] = topic3
+		topicHashes = append(topicHashes, common.HexToHash(topic3))
 		topicsNum++
 	}
 	log.Printf("From go ProcessLog Number of topic inputs is %d\n", topicsNum)
@@ -79,6 +79,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// get the matching event from abi using the hash in topics[0]
 	eventStruct, err := contractABI.EventByID(common.HexToHash(topic0))
 	if err != nil {
+		log.Printf("From go ProcessLog Error: Event not found in abi\n")
 		return nil
 	}
 	log.Printf("From go ProcessLog EventByID found event: %s\n", eventStruct.Name)
@@ -91,7 +92,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 		log.Printf("From go ProcessLog Event is anonymous: %t\n", eventStruct.Anonymous)
 	}
 
-	// how many inputs for this Event in abi
+	// how many total inputs for this Event in abi
 	numInputs := len(eventStruct.Inputs)
 	log.Printf("From go ProcessLog Number of unputs in abi for this event is: %d\n", numInputs)
 
@@ -103,6 +104,33 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	}
 	dataInputsNum := len(dataInputs)
 	log.Printf("From go ProcessLog Number of Log data items is: %d\n", dataInputsNum)
+
+	// data inputs (non-indexed) + topic inputs (indexed) = total inputs?
+	if topicsNum+dataInputsNum != numInputs {
+		log.Printf("From go ProcessLog Error number of inputs does't match abi specification\n")
+		return nil
+	}
+
+	// parse topics into map
+	topicsMap := make(map[string]interface{})
+	if topicsNum > 0 {
+		// create new array of only indexed parameters
+		fields := make(abi.Arguments, 0, topicsNum)
+		for _, input := range eventStruct.Inputs {
+			if input.Indexed {
+				fields = append(fields, input)
+			}
+		}
+		err = abi.ParseTopicsIntoMap(topicsMap, fields, topicHashes)
+		if err != nil {
+			log.Printf("From go ProcessLog Error parsing topics\n")
+			return nil
+		}
+		log.Printf("From go ProcessLog Parsed %d topics\n", len(topicsMap))
+		for key, value := range topicsMap {
+			log.Printf("From go ProcessLog Topic name: %s, value: %v\n", key, value)
+		}
+	}
 
 	// go slice to hold input parameters
 	params := make([](*C.InputParam), numInputs)
@@ -120,8 +148,9 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 
 		// indexed from topics, non-indexed from data
 		if input.Indexed {
-			log.Printf("From go ProcessLog Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, topicsInputs[topicIndex])
-			value = topicsInputs[topicIndex]
+			log.Printf("From go ProcessLog Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, topicsMap[input.Name])
+
+			value = topicsMap[input.Name]
 			topicIndex++
 		} else {
 			log.Printf("From go ProcessLog NON-Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, dataInputs[dataIndex])
