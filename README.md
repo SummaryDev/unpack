@@ -36,13 +36,38 @@ Start the interactive shell `psql`.
 Execute SQL:
 
 ```sql
-select logs.log_index, unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address;
+select (x).* 
+from (
+select unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address 
+	where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a') sub;
 
-select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39';
+select (x).* 
+from (
+select unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address 
+	where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39') sub;
 
-select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a';
+select (x).* 
+from (
+select unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address 
+	where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1') sub;
 
-select unpack(abi, data, topics) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1';
+select (x).* 
+from (
+select unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address) sub;
+
+select log_index, (x).* 
+from (
+select *, unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address) sub;
+
+select log_index, transaction_hash, (x).* 
+from (
+select *, unpack(abi, data, topics) as x
+	from abi INNER JOIN logs ON logs.address = abi.address) sub;
 ```
 
 This will just output all addresses and write some debug into postgres
