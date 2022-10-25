@@ -68,6 +68,10 @@ select log_index, transaction_hash, (x).*
 from (
 select *, unpack(abi, data, topics) as x
 	from abi INNER JOIN logs ON logs.address = abi.address) sub;
+
+SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
+
+SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 ```
 
 This will just output all addresses and write some debug into postgres
