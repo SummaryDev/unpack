@@ -2,6 +2,7 @@ package main
 
 /*
 typedef struct {
+	char *Event;
 	char *Name;
 	char *Type;
 	char *Value;
@@ -141,6 +142,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	for i, input := range eventStruct.Inputs {
 		param := C.InputParam{}
 
+		param.Event = C.CString(eventStruct.Name)
 		param.Name = C.CString(input.Name)
 		param.Type = C.CString(input.Type.String())
 
