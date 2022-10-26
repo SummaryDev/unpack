@@ -54,24 +54,9 @@ select unpack(abi, data, topics) as x
 	from abi INNER JOIN logs ON logs.address = abi.address 
 	where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1') sub;
 
-select (x).* 
-from (
-select unpack(abi, data, topics) as x
-	from abi INNER JOIN logs ON logs.address = abi.address where abi.abi IS NOT NULL) sub;
+SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 
-select log_index, (x).* 
-from (
-select *, unpack(abi, data, topics) as x
-	from abi INNER JOIN logs ON logs.address = abi.address where abi.abi IS NOT NULL) sub;
-
-select log_index, transaction_hash, (x).* 
-from (
-select *, unpack(abi, data, topics) as x
-	from abi INNER JOIN logs ON logs.address = abi.address where abi.abi IS NOT NULL) sub;
-
-SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x where abi.abi IS NOT NULL;
-
-SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x where abi.abi IS NOT NULL;
+SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 ```
 
 This will just output all addresses and write some debug into postgres

@@ -29,6 +29,10 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 
 	// abi
 	abiString := C.GoString(inAbi)
+	if len(abiString) < 1 {
+		log.Printf("From go ProcessLog Error abi is empty\n")
+		return nil
+	}
 	log.Printf("From go ProcessLog abi: %s, Size: %d\n", abiString, len(abiString))
 	contractABI, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {

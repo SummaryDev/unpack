@@ -30,24 +30,27 @@ Datum unpack(PG_FUNCTION_ARGS)
     funcctx = SRF_FIRSTCALL_INIT();
     oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
-    if( PG_ARGISNULL(0) ) {
-      ereport(LOG, (errmsg("Error: abi is null")));
-      SRF_RETURN_DONE(funcctx);
-    } 
-
     // TODO: check when data and topics are null and decide what to do
 
     // get the args
     // abi
-    text *abi = PG_GETARG_TEXT_P_COPY(0);
-    int abiSize = VARSIZE_ANY_EXHDR(abi);
-    char *abiArg = (char*) palloc((abiSize + 1) * sizeof(char));
-    strcpy (abiArg, (char *)VARDATA_ANY(abi));
-    abiArg[abiSize] = '\0';
-    ereport(LOG, (errmsg("Abi is: %s, size is: %d", abiArg, abiSize)));
-    
+    char *abiArg;
+    if (!PG_ARGISNULL(0)) {
+      text *abi = PG_GETARG_TEXT_PP(0);
+      int abiSize = VARSIZE_ANY_EXHDR(abi);
+      abiArg = (char*) palloc((abiSize + 1) * sizeof(char));
+      strcpy (abiArg, (char *)VARDATA_ANY(abi));
+      abiArg[abiSize] = '\0';
+      ereport(LOG, (errmsg("Abi is: %s, size is: %d", abiArg, abiSize)));
+    }
+    else {
+      abiArg = (char*) palloc(sizeof(char));
+      abiArg[0] = '\0';
+      ereport(LOG, (errmsg("Error: abi is null")));
+    }
+
     // data
-    text *data = PG_GETARG_TEXT_P_COPY(1);
+    text *data = PG_GETARG_TEXT_PP(1);
     int dataSize = VARSIZE_ANY_EXHDR(data);
     char *dataArg = (char*) palloc((dataSize + 1) * sizeof(char));
     strcpy (dataArg, (char *)VARDATA_ANY(data));
@@ -64,7 +67,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     bool *nulls;
     int nelems;
 
-    topics = PG_GETARG_ARRAYTYPE_P_COPY(2);
+    topics = PG_GETARG_ARRAYTYPE_P(2);
     eltype = ARR_ELEMTYPE(topics);
     get_typlenbyvalalign(eltype, &elmlen, &elmbyval, &elmalign);
     deconstruct_array(topics, eltype, elmlen, elmbyval, elmalign, &elems, &nulls, &nelems);
@@ -76,7 +79,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     // copy to array of strings to pass to go lib
     for (int i = 0; i < nelems; i++) {
 
-      char *topic = (char *)VARDATA_ANY(DatumGetTextPCopy(elems[i]));
+      char *topic = (char *)VARDATA_ANY(DatumGetTextP(elems[i]));
       //TODO: check the length of topic, decide what to do if not 66
 
       topicsArg[i] = (char*)palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
@@ -106,13 +109,22 @@ Datum unpack(PG_FUNCTION_ARGS)
     funcctx->user_fctx = params;
 
     if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
-            ereport(ERROR,
-                    (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-                     errmsg("function returning record called in context "
-                            "that cannot accept type record")));
+          ereport(ERROR,
+                  (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+                    errmsg("function returning record called in context "
+                          "that cannot accept type record")));
 
     attinmeta = TupleDescGetAttInMetadata(tupdesc);
     funcctx->attinmeta = attinmeta;
+
+
+    // clean up
+    pfree(abiArg);
+    pfree(dataArg);
+    pfree(topicsArg[0]);
+    pfree(topicsArg[1]);
+    pfree(topicsArg[2]);
+    pfree(topicsArg[3]);
 
     MemoryContextSwitchTo(oldcontext);
   }
@@ -151,6 +163,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     SRF_RETURN_NEXT(funcctx, result);
   }
   else {
+    ereport(LOG, (errmsg("Calling SRF_RETURN_DONE, call_cntr: %d, max_call: %d",call_cntr,  max_calls)));
     SRF_RETURN_DONE(funcctx);
   }
 }
