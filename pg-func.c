@@ -96,7 +96,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     }
 
     // for now passing all four topics separately
-    int numParams;
+    //int numParams;
     //InputParam **params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
     //params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
 
