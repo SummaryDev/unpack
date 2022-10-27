@@ -39,9 +39,13 @@ Datum unpack(PG_FUNCTION_ARGS)
     char *abiArg;
     if (!PG_ARGISNULL(0)) {
       text *abi = PG_GETARG_TEXT_PP(0);
+      ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 001")));
       int abiSize = VARSIZE_ANY_EXHDR(abi);
+      ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 002, abi size: %d", abiSize)));
       abiArg = (char*) palloc((abiSize + 1) * sizeof(char));
+      ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 003")));
       strcpy (abiArg, (char *)VARDATA_ANY(abi));
+      ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 004")));
       abiArg[abiSize] = '\0';
       ereport(LOG, (errmsg("Abi is: %s, size is: %d", abiArg, abiSize)));
     }
