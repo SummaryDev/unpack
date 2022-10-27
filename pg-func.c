@@ -98,7 +98,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     // for now passing all four topics separately
     int numParams;
     //InputParam **params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
-    params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
+    //params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
 
     /*
     for (int i = 0; i < numParams; i++) {
@@ -110,8 +110,10 @@ Datum unpack(PG_FUNCTION_ARGS)
     */
 
     //funcctx->max_calls = numParams;
+    //funcctx->user_fctx = params;
+
     funcctx->max_calls = 1;
-    funcctx->user_fctx = params;
+    funcctx->user_fctx = "Something same";
 
     if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
           ereport(ERROR,
