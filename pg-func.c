@@ -112,19 +112,18 @@ Datum unpack(PG_FUNCTION_ARGS)
     ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 3")));
 
     // maximum number of topics is 4
-    char *topicsArg[MAX_NUM_TOPICS];
+    //char *topicsArg[MAX_NUM_TOPICS];
+    char topicsArg[MAX_NUM_TOPICS][MAX_TOPIC_SIZE + 1];
 
     // copy to array of strings to pass to go lib
     for (int i = 0; i < nelems; i++) {
 
+      // find a nice func to convert Datum pointer to C string?
       char *topic = (char *)VARDATA_ANY(DatumGetTextP(elems[i]));
       //TODO: check the length of topic, decide what to do if not 66
-      topicsArg[i] = (char*)palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
+      //topicsArg[i] = (char*)palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
       strcpy(topicsArg[i], topic);
       topicsArg[i][MAX_TOPIC_SIZE] = '\0';
-
-      // find a nice func to convert Datum pointer to C string?
-
       ereport(LOG, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
     }
 
@@ -132,7 +131,7 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     // memset the rest of the topics that are empty
     for (int i = nelems; i < MAX_NUM_TOPICS; i++) {
-      topicsArg[i] = (char*) palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
+      //topicsArg[i] = (char*) palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
       memset(topicsArg[i], '\0', MAX_TOPIC_SIZE + 1);
     }
 
@@ -173,10 +172,10 @@ Datum unpack(PG_FUNCTION_ARGS)
     // clean up
     //pfree(abiArg);
     //pfree(dataArg);
-    pfree(topicsArg[0]);
-    pfree(topicsArg[1]);
-    pfree(topicsArg[2]);
-    pfree(topicsArg[3]);
+    //pfree(topicsArg[0]);
+    //pfree(topicsArg[1]);
+    //pfree(topicsArg[2]);
+    //pfree(topicsArg[3]);
     ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 8")));
 
     MemoryContextSwitchTo(oldcontext);
