@@ -3,6 +3,7 @@
 #include "funcapi.h"
 #include "utils/array.h"
 #include "utils/lsyscache.h"
+#include "utils/builtins.h"
 #include "libunpack.h"
 #include <stdio.h>
 
@@ -36,6 +37,7 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     // get the args
     // abi
+    /*
     char *abiArg;
     if (!PG_ARGISNULL(0)) {
       text *abi = PG_GETARG_TEXT_PP(0);
@@ -54,15 +56,42 @@ Datum unpack(PG_FUNCTION_ARGS)
       abiArg[0] = '\0';
       ereport(LOG, (errmsg("Error: abi is null")));
     }
+    */
     ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 1")));
 
+    // abi
+    char *abiArg;
+    if (!PG_ARGISNULL(0)) {
+      abiArg = text_to_cstring(PG_GETARG_TEXT_PP(0));
+      ereport(LOG, (errmsg("Abi is: %s, size is: %lu", abiArg, strlen(abiArg))));
+    }
+    else {
+      abiArg = "";
+      ereport(LOG, (errmsg("Error: abi is null")));
+    }
+
     // data
+    /*
     text *data = PG_GETARG_TEXT_PP(1);
     int dataSize = VARSIZE_ANY_EXHDR(data);
     char *dataArg = (char*) palloc((dataSize + 1) * sizeof(char));
     strcpy (dataArg, (char *)VARDATA_ANY(data));
     dataArg[dataSize] = '\0';
     ereport(LOG, (errmsg("Data is: %s, size is: %d", dataArg, dataSize)));
+    */
+
+    // data
+    char *dataArg;
+    if (!PG_ARGISNULL(1)) {
+      dataArg = text_to_cstring(PG_GETARG_TEXT_PP(1));
+      ereport(LOG, (errmsg("Data is: %s, size is: %lu", dataArg, strlen(dataArg))));
+    }
+    else {
+      dataArg = "";
+      ereport(LOG, (errmsg("Error: data is null")));
+    }
+
+
     ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 2")));
 
     // topics
@@ -90,10 +119,12 @@ Datum unpack(PG_FUNCTION_ARGS)
 
       char *topic = (char *)VARDATA_ANY(DatumGetTextP(elems[i]));
       //TODO: check the length of topic, decide what to do if not 66
-
       topicsArg[i] = (char*)palloc((MAX_TOPIC_SIZE + 1) * sizeof(char));
       strcpy(topicsArg[i], topic);
       topicsArg[i][MAX_TOPIC_SIZE] = '\0';
+
+      // find a nice func to convert Datum pointer to C string?
+
       ereport(LOG, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
     }
 
@@ -140,8 +171,8 @@ Datum unpack(PG_FUNCTION_ARGS)
 
 
     // clean up
-    pfree(abiArg);
-    pfree(dataArg);
+    //pfree(abiArg);
+    //pfree(dataArg);
     pfree(topicsArg[0]);
     pfree(topicsArg[1]);
     pfree(topicsArg[2]);
