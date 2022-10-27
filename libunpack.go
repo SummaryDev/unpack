@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"unsafe"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -22,7 +21,10 @@ import (
 
 //export  ProcessLog
 func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char,
-	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.InputParam {
+	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) *C.char {
+
+	//func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char,
+	//inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.InputParam {
 
 	// init the number of returned params
 	*numParams = 0
@@ -173,13 +175,16 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	*numParams = C.int(len(params))
 
 	// convert go slice to C pointer array
-	ret := C.malloc(C.size_t(len(params)) * C.size_t(unsafe.Sizeof(uintptr(0))))
-	pRet := (*[1<<30 - 1]*C.InputParam)(ret)
+	/*
+		ret := C.malloc(C.size_t(len(params)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+		pRet := (*[1<<30 - 1]*C.InputParam)(ret)
 
-	for i, item := range params {
-		pRet[i] = item
-	}
-	return (**C.InputParam)(ret)
+		for i, item := range params {
+			pRet[i] = item
+		}
+		return (**C.InputParam)(ret)
+	*/
+	return (*C.char)(C.CString(eventStruct.Name))
 }
 
 // FromHex returns the bytes represented by the hexadecimal string s.

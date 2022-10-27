@@ -21,7 +21,8 @@ Datum unpack(PG_FUNCTION_ARGS)
   AttInMetadata *attinmeta;
   int call_cntr;
   int max_calls;
-  InputParam **params;
+  //InputParam **params;
+  char *params;
 
   // stuff done only on the first call of the function
   if (SRF_IS_FIRSTCALL()) {
@@ -96,16 +97,20 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     // for now passing all four topics separately
     int numParams;
-    InputParam **params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
-    
+    //InputParam **params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
+    params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams);
+
+    /*
     for (int i = 0; i < numParams; i++) {
       InputParam *param = *(params + i);
       
       ereport(LOG, (errmsg("ProcessLog returned - Name: %s, Type: %s, Value: %s, index: %d", param->Name, param->Type, 
       param->Value, i)));
     }
+    */
 
-    funcctx->max_calls = numParams;
+    //funcctx->max_calls = numParams;
+    funcctx->max_calls = 1;
     funcctx->user_fctx = params;
 
     if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
@@ -135,16 +140,20 @@ Datum unpack(PG_FUNCTION_ARGS)
   attinmeta = funcctx->attinmeta; 
   params = funcctx->user_fctx;
 
-  if (call_cntr < max_calls) {
+  if ((call_cntr < max_calls) && params) {
     char **values;
     HeapTuple tuple;
     Datum result;
+    /*
     InputParam *param = *(params + call_cntr);
 
     ereport(LOG, (errmsg("IN LOOP 0, call_cntr: %d, max_call: %d, param name: %s, param size: %lu",
-          call_cntr,  max_calls, param->Name, strlen(param->Name))));
+        call_cntr,  max_calls, param->Name, strlen(param->Name))));
+    */
 
     values = (char **) palloc(4 * sizeof(char *));
+    
+    /*
     values[0] = (char *) palloc((strlen(param->Event)+1) * sizeof(char));
     values[1] = (char *) palloc((strlen(param->Name)+1) * sizeof(char));
     values[2] = (char *) palloc((strlen(param->Type)+1) * sizeof(char));
@@ -154,6 +163,17 @@ Datum unpack(PG_FUNCTION_ARGS)
     strcpy(values[1], param->Name);
     strcpy(values[2], param->Type);
     strcpy(values[3], param->Value);
+    */
+
+    values[0] = (char *) palloc((strlen(params)+1) * sizeof(char));
+    values[1] = (char *) palloc((strlen(params)+1) * sizeof(char));
+    values[2] = (char *) palloc((strlen(params)+1) * sizeof(char));
+    values[3] = (char *) palloc((strlen(params)+1) * sizeof(char));
+
+    strcpy(values[0], params);
+    strcpy(values[1], params);
+    strcpy(values[2], params);
+    strcpy(values[3], params);
 
     tuple = BuildTupleFromCStrings(attinmeta, values);
     result = HeapTupleGetDatum(tuple);
