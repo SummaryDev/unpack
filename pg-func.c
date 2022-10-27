@@ -27,11 +27,12 @@ Datum unpack(PG_FUNCTION_ARGS)
   // stuff done only on the first call of the function
   if (SRF_IS_FIRSTCALL()) {
 
-    //MemoryContext oldcontext;
+    MemoryContext oldcontext;
     funcctx = SRF_FIRSTCALL_INIT();
-    //oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+    oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
     // TODO: check when data and topics are null and decide what to do
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 0")));
 
     // get the args
     // abi
@@ -49,6 +50,7 @@ Datum unpack(PG_FUNCTION_ARGS)
       abiArg[0] = '\0';
       ereport(LOG, (errmsg("Error: abi is null")));
     }
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 1")));
 
     // data
     text *data = PG_GETARG_TEXT_PP(1);
@@ -57,6 +59,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     strcpy (dataArg, (char *)VARDATA_ANY(data));
     dataArg[dataSize] = '\0';
     ereport(LOG, (errmsg("Data is: %s, size is: %d", dataArg, dataSize)));
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 2")));
 
     // topics
     ArrayType *topics;
@@ -73,7 +76,8 @@ Datum unpack(PG_FUNCTION_ARGS)
     get_typlenbyvalalign(eltype, &elmlen, &elmbyval, &elmalign);
     deconstruct_array(topics, eltype, elmlen, elmbyval, elmalign, &elems, &nulls, &nelems);
     ereport(LOG, (errmsg("Number of topics is: %d", nelems)));
-    
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 3")));
+
     // maximum number of topics is 4
     char *topicsArg[MAX_NUM_TOPICS];
 
@@ -88,6 +92,8 @@ Datum unpack(PG_FUNCTION_ARGS)
       topicsArg[i][MAX_TOPIC_SIZE] = '\0';
       ereport(LOG, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
     }
+
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 4")));
 
     // memset the rest of the topics that are empty
     for (int i = nelems; i < MAX_NUM_TOPICS; i++) {
@@ -114,14 +120,18 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     funcctx->max_calls = 1;
     funcctx->user_fctx = "Something same";
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 5")));
 
     if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
           ereport(ERROR,
                   (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
                     errmsg("function returning record called in context "
                           "that cannot accept type record")));
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 6")));
 
     attinmeta = TupleDescGetAttInMetadata(tupdesc);
+        ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 7")));
+
     funcctx->attinmeta = attinmeta;
 
 
@@ -132,15 +142,19 @@ Datum unpack(PG_FUNCTION_ARGS)
     pfree(topicsArg[1]);
     pfree(topicsArg[2]);
     pfree(topicsArg[3]);
+    ereport(LOG, (errmsg("SRF_IS_FIRSTCALL 8")));
 
-    //MemoryContextSwitchTo(oldcontext);
+    MemoryContextSwitchTo(oldcontext);
   }
     
   funcctx = SRF_PERCALL_SETUP();
+  ereport(LOG, (errmsg("SRF_PERCALL_SETUP 0")));
+
   call_cntr = funcctx->call_cntr;
   max_calls = funcctx->max_calls;
   attinmeta = funcctx->attinmeta; 
   params = funcctx->user_fctx;
+  ereport(LOG, (errmsg("SRF_PERCALL_SETUP 1")));
 
   if ((call_cntr < max_calls) && params) {
     char **values;
@@ -152,6 +166,8 @@ Datum unpack(PG_FUNCTION_ARGS)
     ereport(LOG, (errmsg("IN LOOP 0, call_cntr: %d, max_call: %d, param name: %s, param size: %lu",
         call_cntr,  max_calls, param->Name, strlen(param->Name))));
     */
+
+    ereport(LOG, (errmsg("In LOOP 0")));
 
     values = (char **) palloc(4 * sizeof(char *));
     
@@ -166,21 +182,28 @@ Datum unpack(PG_FUNCTION_ARGS)
     strcpy(values[2], param->Type);
     strcpy(values[3], param->Value);
     */
+    ereport(LOG, (errmsg("In LOOP 1")));
 
     values[0] = (char *) palloc((strlen(params)+1) * sizeof(char));
     values[1] = (char *) palloc((strlen(params)+1) * sizeof(char));
     values[2] = (char *) palloc((strlen(params)+1) * sizeof(char));
     values[3] = (char *) palloc((strlen(params)+1) * sizeof(char));
+    ereport(LOG, (errmsg("In LOOP 2")));
 
     strcpy(values[0], params);
     strcpy(values[1], params);
     strcpy(values[2], params);
     strcpy(values[3], params);
+    ereport(LOG, (errmsg("In LOOP 3")));
 
     tuple = BuildTupleFromCStrings(attinmeta, values);
-    result = HeapTupleGetDatum(tuple);
+    
+    ereport(LOG, (errmsg("In LOOP 4")));
 
-    ereport(LOG, (errmsg("IN LOOP 1, call_cntr: %d, max_call: %d",call_cntr,  max_calls)));
+    result = HeapTupleGetDatum(tuple);
+    ereport(LOG, (errmsg("In LOOP 5")));
+
+    ereport(LOG, (errmsg("IN LOOP call_cntr: %d, max_call: %d",call_cntr,  max_calls)));
 
     SRF_RETURN_NEXT(funcctx, result);
   }
