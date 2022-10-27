@@ -27,9 +27,9 @@ Datum unpack(PG_FUNCTION_ARGS)
   // stuff done only on the first call of the function
   if (SRF_IS_FIRSTCALL()) {
 
-    MemoryContext oldcontext;
+    //MemoryContext oldcontext;
     funcctx = SRF_FIRSTCALL_INIT();
-    oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+    //oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
     // TODO: check when data and topics are null and decide what to do
 
@@ -133,7 +133,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     pfree(topicsArg[2]);
     pfree(topicsArg[3]);
 
-    MemoryContextSwitchTo(oldcontext);
+    //MemoryContextSwitchTo(oldcontext);
   }
     
   funcctx = SRF_PERCALL_SETUP();
