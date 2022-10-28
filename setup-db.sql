@@ -6,12 +6,7 @@ CREATE TABLE IF NOT EXISTS abi (
 	abi TEXT
 );
 
-\set abipath `pwd`'/abis.csv'
-
-COPY abi("address", abi)
-FROM :'abipath'
-DELIMITER ','
-CSV HEADER;
+\COPY abi("address", abi) FROM 'abis.csv' DELIMITER ',' CSV HEADER;
 
 CREATE TABLE IF NOT EXISTS logs (
 	log_index INTEGER,
@@ -29,9 +24,4 @@ CREATE TABLE IF NOT EXISTS logs (
 			REFERENCES abi(address)
 );
 
-\set logspath `pwd`'/logs.csv'
-
-COPY logs(log_index, transaction_hash, transaction_index, "address", "data", topics, block_timestamp, block_number, block_hash)
-FROM :'logspath'
-DELIMITER ','
-CSV HEADER;
+\COPY logs(log_index, transaction_hash, transaction_index, "address", "data", topics, block_timestamp, block_number, block_hash) FROM 'logs.csv' DELIMITER ',' CSV HEADER;
