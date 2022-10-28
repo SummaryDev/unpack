@@ -36,7 +36,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     char *abiArg;
     if (!PG_ARGISNULL(0)) {
       abiArg = text_to_cstring(PG_GETARG_TEXT_PP(0));
-      ereport(INFO, (errmsg("Abi is: %s, size is: %lu", abiArg, strlen(abiArg))));
+      ereport(DEBUG1, (errmsg("Abi is: %s, size is: %lu", abiArg, strlen(abiArg))));
     }
     else {
       abiArg = "";
@@ -47,7 +47,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     char *dataArg;
     if (!PG_ARGISNULL(1)) {
       dataArg = text_to_cstring(PG_GETARG_TEXT_PP(1));
-      ereport(INFO, (errmsg("Data is: %s, size is: %lu", dataArg, strlen(dataArg))));
+      ereport(DEBUG1, (errmsg("Data is: %s, size is: %lu", dataArg, strlen(dataArg))));
     }
     else {
       dataArg = "";
@@ -68,7 +68,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     eltype = ARR_ELEMTYPE(topics);
     get_typlenbyvalalign(eltype, &elmlen, &elmbyval, &elmalign);
     deconstruct_array(topics, eltype, elmlen, elmbyval, elmalign, &elems, &nulls, &nelems);
-    ereport(INFO, (errmsg("Number of topics is: %d", nelems)));
+    ereport(DEBUG1, (errmsg("Number of topics is: %d", nelems)));
 
     // maximum number of topics is 4, size is 66
     char topicsArg[MAX_NUM_TOPICS][MAX_TOPIC_SIZE + 1];
@@ -77,7 +77,7 @@ Datum unpack(PG_FUNCTION_ARGS)
     for (int i = 0; i < nelems; i++) {
       strncpy (topicsArg[i], text_to_cstring(DatumGetTextP(elems[i])), MAX_TOPIC_SIZE);
       topicsArg[i][MAX_TOPIC_SIZE] = '\0';
-      ereport(INFO, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
+      ereport(DEBUG1, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
     }
 
     // memset the rest of the topics that are empty
@@ -100,7 +100,7 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     for (int i = 0; i < numParams; i++) {
       InputParam *param = *(params + i);
-      ereport(INFO, (errmsg("ProcessLog returned - Name: %s, Type: %s, Value: %s, index: %d", param->Name, param->Type, 
+      ereport(DEBUG1, (errmsg("ProcessLog returned - Name: %s, Type: %s, Value: %s, index: %d", param->Name, param->Type, 
           param->Value, i)));
     }
   

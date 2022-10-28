@@ -78,4 +78,4 @@ Observe log output from our function:
 2022-10-28 15:53:54.747 AST [93085] STATEMENT:  SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 ```
 
-To see more verbose logging for our function set log_min_messages to info.
+To see more verbose logging for our function set log_min_messages to debug1.
