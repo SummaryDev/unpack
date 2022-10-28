@@ -75,10 +75,7 @@ Datum unpack(PG_FUNCTION_ARGS)
 
     // copy to array of strings to pass to go lib
     for (int i = 0; i < nelems; i++) {
-
-      // find a nice func to convert Datum pointer to C string?
-      char *topic = (char *)VARDATA_ANY(DatumGetTextP(elems[i]));
-      strcpy(topicsArg[i], topic);
+      strncpy (topicsArg[i], text_to_cstring(DatumGetTextP(elems[i])), MAX_TOPIC_SIZE);
       topicsArg[i][MAX_TOPIC_SIZE] = '\0';
       ereport(LOG, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
     }
