@@ -2,8 +2,6 @@
 
 Utility to unpack call data with smart contract ABI.
 
-WARNING: Inputs are written to log file for now. Make sure to run make install-db (fixed some .csv files)
-
 1. Setup environment variables to connect to your Postgres db with
    `psql`:
 
