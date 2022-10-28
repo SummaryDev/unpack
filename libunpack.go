@@ -12,7 +12,6 @@ import "C"
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 	"strings"
 	"unsafe"
 
@@ -22,7 +21,7 @@ import (
 
 //export  ProcessLog
 func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.char,
-	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int) **C.InputParam {
+	inTopic2 *C.char, inTopic3 *C.char, numParams *C.int, errMsg **C.char) **C.InputParam {
 
 	// init the number of returned params
 	*numParams = 0
@@ -30,20 +29,23 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// abi
 	abiString := C.GoString(inAbi)
 	if len(abiString) < 1 {
-		log.Printf("From go ProcessLog Error abi is empty\n")
+		//log.Printf("ERROR: From go ProcessLog - abi is empty\n")
+		*errMsg = C.CString("abi is empty")
 		return nil
 	}
-	log.Printf("From go ProcessLog abi: %s, Size: %d\n", abiString, len(abiString))
+	//log.Printf("DEBUG: From go ProcessLog - abi: %s, Size: %d\n", abiString, len(abiString))
+
 	contractABI, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
-		log.Printf("From go ProcessLog Error processing abi\n")
+		//log.Printf("ERROR: From go ProcessLog - error processing abi, %s\n", err)
+		*errMsg = C.CString(fmt.Sprintf("error processing abi, %s", err))
 		return nil
 	}
-	log.Printf("From go ProcessLog Num abi events: %d\n", len(contractABI.Events))
+	//log.Printf("DEBUG: From go ProcessLog - num abi events: %d\n", len(contractABI.Events))
 
 	// topics0 - this is the Event Sig hashed with Keccak256
 	topic0 := C.GoString(inTopic0)
-	log.Printf("From go ProcessLog topic0: %s, Size: %d\n", topic0, len(topic0))
+	//log.Printf("DEBUG: From go ProcessLog - topic0: %s, Size: %d\n", topic0, len(topic0))
 
 	// inputs from topics as hashes
 	topicHashes := make([]common.Hash, 0, 3)
@@ -52,7 +54,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// topics1
 	topic1 := C.GoString(inTopic1)
 	if len(topic1) > 0 {
-		log.Printf("From go ProcessLog topic1: %s, Size: %d\n", topic1, len(topic1))
+		//log.Printf("DEBUG: From go ProcessLog - topic1: %s, Size: %d\n", topic1, len(topic1))
 		topicHashes = append(topicHashes, common.HexToHash(topic1))
 		topicsNum++
 	}
@@ -60,7 +62,7 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// topics2
 	topic2 := C.GoString(inTopic2)
 	if len(topic2) > 0 {
-		log.Printf("From go ProcessLog topic2: %s, Size: %d\n", topic2, len(topic2))
+		//log.Printf("DEBUG: From go ProcessLog - topic2: %s, Size: %d\n", topic2, len(topic2))
 		topicHashes = append(topicHashes, common.HexToHash(topic2))
 		topicsNum++
 	}
@@ -68,55 +70,60 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 	// topics3
 	topic3 := C.GoString(inTopic3)
 	if len(topic3) > 0 {
-		log.Printf("From go ProcessLog topic3: %s, Size: %d\n", topic3, len(topic3))
+		//log.Printf("DEBUG: From go ProcessLog - topic3: %s, Size: %d\n", topic3, len(topic3))
 		topicHashes = append(topicHashes, common.HexToHash(topic3))
 		topicsNum++
 	}
-	log.Printf("From go ProcessLog Number of topic inputs is %d\n", topicsNum)
+	//log.Printf("DEBUG: From go ProcessLog - number of topic inputs is %d\n", topicsNum)
 
 	// data
 	data := C.GoString(inData)
 	if len(data) < 1 {
-		log.Printf("From go ProcessLog Error data is empty\n")
+		//log.Printf("ERROR: From go ProcessLog - data is empty\n")
+		*errMsg = C.CString(fmt.Sprintf("data is empty"))
 		return nil
 	}
-	log.Printf("From go ProcessLog data: %s, Size: %d\n", data, len(data))
+	//log.Printf("DEBUG: From go ProcessLog - data: %s, Size: %d\n", data, len(data))
 	dataClean := fromHex(data)
-	log.Printf("From go ProcessLog clean data: %s, Size: %d\n", dataClean, len(dataClean))
+	//log.Printf("DEBUG: From go ProcessLog - clean data: %s, Size: %d\n", dataClean, len(dataClean))
 	dataHex, _ := hex.DecodeString(dataClean)
 
 	// get the matching event from abi using the hash in topics[0]
 	eventStruct, err := contractABI.EventByID(common.HexToHash(topic0))
 	if err != nil {
-		log.Printf("From go ProcessLog Error: Event not found in abi\n")
+		//log.Printf("ERROR: From go ProcessLog - event not found in abi, %s\n", err)
+		*errMsg = C.CString(fmt.Sprintf("event not found in abi, %s", err))
 		return nil
 	}
-	log.Printf("From go ProcessLog EventByID found event: %s\n", eventStruct.Name)
+	//log.Printf("DEBUG: From go ProcessLog - EventByID found event: %s\n", eventStruct.Name)
 
 	// return empty result if anonymous event
 	if eventStruct.Anonymous == true {
-		log.Printf("From go ProcessLog Event is anonymous: %t, cannot unpack\n", eventStruct.Anonymous)
+		//log.Printf("INFO: From go ProcessLog - event is anonymous: %t, cannot unpack\n", eventStruct.Anonymous)
+		*errMsg = C.CString(fmt.Sprintf("event is anonymous, cannot unpack"))
 		return nil
 	} else {
-		log.Printf("From go ProcessLog Event is anonymous: %t\n", eventStruct.Anonymous)
+		//log.Printf("DEBUG: From go ProcessLog - event is anonymous: %t\n", eventStruct.Anonymous)
 	}
 
 	// how many total inputs for this Event in abi
 	numInputs := len(eventStruct.Inputs)
-	log.Printf("From go ProcessLog Number of unputs in abi for this event is: %d\n", numInputs)
+	//log.Printf("DEBUG: From go ProcessLog - number of unputs in abi for this event is: %d\n", numInputs)
 
 	// unpack the inputs from log data
 	dataInputs, err := contractABI.Unpack(eventStruct.Name, dataHex)
 	if err != nil {
-		log.Printf("From go ProcessLog Error unpacking log data\n")
+		//log.Printf("ERROR: From go ProcessLog - error unpacking log data, %s\n", err)
+		*errMsg = C.CString(fmt.Sprintf("error unpacking log data, %s", err))
 		return nil
 	}
 	dataInputsNum := len(dataInputs)
-	log.Printf("From go ProcessLog Number of Log data items is: %d\n", dataInputsNum)
+	//log.Printf("DEBUG: From go ProcessLog - number of log data items is: %d\n", dataInputsNum)
 
 	// data inputs (non-indexed) + topic inputs (indexed) = total inputs?
 	if topicsNum+dataInputsNum != numInputs {
-		log.Printf("From go ProcessLog Error number of inputs does't match abi specification\n")
+		//log.Printf("ERROR: From go ProcessLog - number of inputs does't match abi specification\n")
+		*errMsg = C.CString(fmt.Sprintf("number of inputs does't match abi specification"))
 		return nil
 	}
 
@@ -132,13 +139,14 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 		}
 		err = abi.ParseTopicsIntoMap(topicsMap, fields, topicHashes)
 		if err != nil {
-			log.Printf("From go ProcessLog Error parsing topics\n")
+			//log.Printf("ERROR: From go ProcessLog - error parsing topics, %s\n", err)
+			*errMsg = C.CString(fmt.Sprintf("error parsing topics, %s", err))
 			return nil
 		}
-		log.Printf("From go ProcessLog Parsed %d topics\n", len(topicsMap))
-		for key, value := range topicsMap {
-			log.Printf("From go ProcessLog Topic name: %s, value: %v\n", key, value)
-		}
+		//log.Printf("DEBUG: From go ProcessLog - parsed %d topics\n", len(topicsMap))
+		//for key, value := range topicsMap {
+		//	log.Printf("DEBUG: From go ProcessLog - topic name: %s, value: %v\n", key, value)
+		//}
 	}
 
 	// go slice to hold input parameters
@@ -158,12 +166,13 @@ func ProcessLog(inAbi *C.char, inData *C.char, inTopic0 *C.char, inTopic1 *C.cha
 
 		// indexed from topics, non-indexed from data
 		if input.Indexed {
-			log.Printf("From go ProcessLog Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, topicsMap[input.Name])
-
+			//log.Printf("DEBUG: From go ProcessLog - Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n",
+			//	input.Name, input.Type, topicsMap[input.Name])
 			value = topicsMap[input.Name]
 			topicIndex++
 		} else {
-			log.Printf("From go ProcessLog NON-Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n", input.Name, input.Type, dataInputs[dataIndex])
+			//log.Printf("DEBUG: From go ProcessLog - NON-Indexed INPUT NAME: %s, TYPE: %s, VALUE: %v\n",
+			//	input.Name, input.Type, dataInputs[dataIndex])
 			value = dataInputs[dataIndex]
 			dataIndex++
 		}

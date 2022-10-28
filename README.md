@@ -59,20 +59,25 @@ SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, 
 SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 ```
 
-This will just output all addresses and write some debug into postgres
-log file, look for postgresql.log location and tail it:
-
-For example:
+The module will log into postgres log file. Tail it to see the activity.
 
 ```bash
 tail -f /var/log/postgresql/postgresql-12-main.log
 ```
 
-Observe debug output from our function:
+Logging level is controlled by the following variable in postgresql.conf file:
+
+````
+log_min_messages		warning  			#is the default
+````
+
+with levels: debug5, debug4, debug3, debug2, debug1, info, notice, warning, error, log, fatal, panic
+
+Observe log output from our function:
 
 ```
-2022/10/17 17:46:20 From go function: 0x8007aa43792a392b221dc091bdb2191e5ff626d1
-2022/10/17 17:46:20 From go function: 0xb1690c08e213a35ed9bab7b318de14420fb57d8c
-2022/10/17 17:46:20 From go function: 0x2b591e99afe9f32eaa6214f7b7629768c40eeb39
-2022/10/17 17:46:20 From go function: 0xa506758544a71943b5e8728d2df8ec9e72473a9a
+2022-10-28 15:53:54.747 AST [93085] LOG:  ProcessLog returned 2 results
+2022-10-28 15:53:54.747 AST [93085] STATEMENT:  SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
 ```
+
+To see more verbose logging for our function set log_min_messages to info.
