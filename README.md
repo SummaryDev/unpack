@@ -36,25 +36,25 @@ Execute SQL:
 ```sql
 select (x).* 
 from (
-select unpack(abi, data, topics) as x
+select unpack(abi, data, topic0, topic1, topic2, topic3) as x
 	from abi INNER JOIN logs ON logs.address = abi.address 
 	where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a') sub;
 
 select (x).* 
 from (
-select unpack(abi, data, topics) as x
+select unpack(abi, data, topic0, topic1, topic2, topic3) as x
 	from abi INNER JOIN logs ON logs.address = abi.address 
 	where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39') sub;
 
 select (x).* 
 from (
-select unpack(abi, data, topics) as x
+select unpack(abi, data, topic0, topic1, topic2, topic3) as x
 	from abi INNER JOIN logs ON logs.address = abi.address 
 	where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1') sub;
 
-SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
+SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topic0, topic1, topic2, topic3) x;
 
-SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
+SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topic0, topic1, topic2, topic3) x;
 ```
 
 The module will log into postgres log file. Tail it to see the activity.
@@ -75,7 +75,7 @@ Observe log output from our function:
 
 ```
 2022-10-28 15:53:54.747 AST [93085] LOG:  ProcessLog returned 2 results
-2022-10-28 15:53:54.747 AST [93085] STATEMENT:  SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topics) x;
+2022-10-28 15:53:54.747 AST [93085] STATEMENT:  SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topic0, topic1, topic2, topic3) x;
 ```
 
 To see more verbose logging for our function set log_min_messages to debug1.

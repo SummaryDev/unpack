@@ -46,6 +46,21 @@ Datum unpack(PG_FUNCTION_ARGS)
   }
 
   // topics
+  // maximum number of topics is 4, size is 66
+  char topicsArg[MAX_NUM_TOPICS][MAX_TOPIC_SIZE + 1];
+
+  for (int i = 0; i < MAX_NUM_TOPICS; i++) {
+    // memset the the topics to 0
+    memset(topicsArg[i], '\0', MAX_TOPIC_SIZE + 1);
+
+    // get each topic argument: 2, 3, 4, and 5, loop index+2
+    if (!PG_ARGISNULL(i+2)) {
+      strcpy (topicsArg[i], text_to_cstring(PG_GETARG_TEXT_PP(i+2)));
+      ereport(DEBUG1, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
+    }
+  } 
+
+  /* getting array of text
   ArrayType *topics;
   Oid eltype;
   int16 elmlen;
@@ -75,8 +90,9 @@ Datum unpack(PG_FUNCTION_ARGS)
   for (int i = nelems; i < MAX_NUM_TOPICS; i++) {
     memset(topicsArg[i], '\0', MAX_TOPIC_SIZE + 1);
   }
+  */
 
-  /* check to see if caller supports us returning a tuplestore */
+  // check to see if caller supports us returning a tuplestore
   if (rsinfo == NULL || !IsA(rsinfo, ReturnSetInfo))
       ereport(ERROR,
               (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
@@ -102,7 +118,7 @@ Datum unpack(PG_FUNCTION_ARGS)
   rsinfo->setDesc = tupdesc;
   MemoryContextSwitchTo(oldcontext);
 
-  // for now passing all four topics separately
+  // call the go processing function
   int numParams;
   char *errMsg = "";
   params = ProcessLog(abiArg, dataArg, topicsArg[0], topicsArg[1], topicsArg[2], topicsArg[3], &numParams, &errMsg);
