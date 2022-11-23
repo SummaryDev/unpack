@@ -7,6 +7,7 @@
 #include "miscadmin.h"
 #include "libunpack.h"
 #include <stdio.h>
+#include "utils/jsonb.h"
 
 PG_MODULE_MAGIC;
 
@@ -16,10 +17,8 @@ Datum unpack(PG_FUNCTION_ARGS)
 {
   const int MAX_TOPIC_SIZE = 66;
   const int MAX_NUM_TOPICS = 4;
+  const int MAX_RESULT_SIZE = 65535;
 
-  ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
-  Tuplestorestate *tupstore;
-  TupleDesc tupdesc;
   InputParam **params;
 
   // get the args
@@ -60,64 +59,6 @@ Datum unpack(PG_FUNCTION_ARGS)
     }
   } 
 
-  /* getting array of text
-  ArrayType *topics;
-  Oid eltype;
-  int16 elmlen;
-  bool elmbyval;
-  char elmalign;
-  Datum *elems;
-  bool *nulls;
-  int nelems;
-
-  topics = PG_GETARG_ARRAYTYPE_P(2);
-  eltype = ARR_ELEMTYPE(topics);
-  get_typlenbyvalalign(eltype, &elmlen, &elmbyval, &elmalign);
-  deconstruct_array(topics, eltype, elmlen, elmbyval, elmalign, &elems, &nulls, &nelems);
-  ereport(DEBUG1, (errmsg("Number of topics is: %d", nelems)));
-
-  // maximum number of topics is 4, size is 66
-  char topicsArg[MAX_NUM_TOPICS][MAX_TOPIC_SIZE + 1];
-
-  // copy to array of strings to pass to go lib
-  for (int i = 0; i < nelems; i++) {
-    strncpy (topicsArg[i], text_to_cstring(DatumGetTextP(elems[i])), MAX_TOPIC_SIZE);
-    topicsArg[i][MAX_TOPIC_SIZE] = '\0';
-    ereport(DEBUG1, (errmsg("Topic[%d] is: %s, size is: %lu", i, topicsArg[i], strlen(topicsArg[i]))));
-  }
-
-  // memset the rest of the topics that are empty
-  for (int i = nelems; i < MAX_NUM_TOPICS; i++) {
-    memset(topicsArg[i], '\0', MAX_TOPIC_SIZE + 1);
-  }
-  */
-
-  // check to see if caller supports us returning a tuplestore
-  if (rsinfo == NULL || !IsA(rsinfo, ReturnSetInfo))
-      ereport(ERROR,
-              (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-                errmsg("set-valued function called in context that cannot accept a set")));
-                
-  if (!(rsinfo->allowedModes & SFRM_Materialize) ||
-          rsinfo->expectedDesc == NULL)
-      ereport(ERROR,
-              (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-                errmsg("materialize mode required, but it is not allowed in this context")));
-
-  if (get_call_result_type(fcinfo, NULL, &tupdesc) != TYPEFUNC_COMPOSITE)
-        ereport(ERROR,
-                (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-                  errmsg("function returning record called in context "
-                        "that cannot accept type record")));
-
-  MemoryContext per_query_ctx = rsinfo->econtext->ecxt_per_query_memory;
-  MemoryContext oldcontext = MemoryContextSwitchTo(per_query_ctx); 
-  tupstore = tuplestore_begin_heap(false, false, work_mem);
-  rsinfo->returnMode = SFRM_Materialize;
-  rsinfo->setResult = tupstore;
-  rsinfo->setDesc = tupdesc;
-  MemoryContextSwitchTo(oldcontext);
-
   // call the go processing function
   int numParams;
   char *errMsg = "";
@@ -131,25 +72,26 @@ Datum unpack(PG_FUNCTION_ARGS)
     ereport(LOG, (errmsg("ProcessLog returned %d results", numParams))); 
   }
 
+  char result[MAX_RESULT_SIZE] = "\0";
+
   for (int i = 0; i < numParams; i++) {
-    Datum values[4];
-    bool nulls[4];
+
     InputParam *param = *(params + i);  
-       
+
+    if (i == 0) {
+      strcat(result, "[");
+    }
+
     ereport(LOG, (errmsg("ProcessLog returned - Event: %s, Name: %s, Type: %s, Value: %s", 
                   param->Event, param->Name, param->Type, param->Value)));
 
-    values[0] = CStringGetTextDatum(param->Event);
-    values[1] = CStringGetTextDatum(param->Name);
-    values[2] = CStringGetTextDatum(param->Type);
-    values[3] = CStringGetTextDatum(param->Value);
-    nulls[0] = false;
-    nulls[1] = false;
-    nulls[2] = false;
-    nulls[3] = false;
+    sprintf(result, "%s{\"name\": \"%s\", \"type\": \"%s\", \"value\": \"%s\"}, ", result, param->Name, param->Type, param->Value);
 
-    tuplestore_putvalues(tupstore, tupdesc, values, nulls);
+    if (i == numParams-1) {
+      result[strlen(result)-2] = ']';
+      result[strlen(result)-1] = '\0';
+    }
   }
 
-  return (Datum) 0;
+  PG_RETURN_TEXT_P(cstring_to_text(result));
 }
