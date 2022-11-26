@@ -38,7 +38,8 @@ $(SRCS_EXT:.c=.d):%.d:%.c
 	$(CC) $(CFLAGS) -MM $< >$@
 
 install: $(PG_MOD)
-	psql --set=MOD=\'$(PG_MOD)\' -f install-func.sql
+	cp $(PG_MOD) $(LIB_DIR)
+	psql --set=MOD=\'$(LIB_DIR)/$(TARGET_EXT)\' -f install-func.sql
 
 install-db:
 	psql -f setup-db.sql

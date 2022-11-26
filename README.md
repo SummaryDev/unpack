@@ -34,27 +34,12 @@ Start the interactive shell `psql`.
 Execute SQL:
 
 ```sql
-select (x).* 
-from (
-select unpack(abi, data, topic0, topic1, topic2, topic3) as x
-	from abi INNER JOIN logs ON logs.address = abi.address 
-	where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a') sub;
 
-select (x).* 
-from (
-select unpack(abi, data, topic0, topic1, topic2, topic3) as x
-	from abi INNER JOIN logs ON logs.address = abi.address 
-	where abi.address = '0x2b591e99afe9f32eaa6214f7b7629768c40eeb39') sub;
+select unpack(abi, data, topic0, topic1, topic2, topic3) from abi INNER JOIN logs ON logs.address = abi.address where abi.address = '0xa506758544a71943b5e8728d2df8ec9e72473a9a';
 
-select (x).* 
-from (
-select unpack(abi, data, topic0, topic1, topic2, topic3) as x
-	from abi INNER JOIN logs ON logs.address = abi.address 
-	where abi.address = '0x8007aa43792a392b221dc091bdb2191e5ff626d1') sub;
+select unpack(abi, data, topic0, topic1, topic2, topic3) from abi INNER JOIN logs ON logs.address = abi.address;
 
-SELECT x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topic0, topic1, topic2, topic3) x;
-
-SELECT log_index, x.* FROM abi JOIN  logs on logs.address = abi.address, unpack(abi, data, topic0, topic1, topic2, topic3) x;
+SELECT log_index, unpack(abi, data, topic0, topic1, topic2, topic3) from abi INNER JOIN logs ON logs.address = abi.address;
 ```
 
 The module will log into postgres log file. Tail it to see the activity.
