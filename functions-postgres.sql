@@ -4,14 +4,36 @@ but missing on the latest postgres https://www.postgresql.org/docs/current/funct
 to keep functions.sql uniform across postgres and redshift
  */
 
+--drop function to_int64 (pos int, data text);
+
+create or replace function to_int64 (pos int, data text) returns bigint immutable
+as $$
+select concat('x', substring(lpad($2, 64, '0'), $1+49, 16))::bit(64)::bigint
+$$ language sql;
+
+-- drop function to_uint64 (pos int, data text);
+
+create or replace function to_uint64 (pos int, data text) returns dec immutable
+as $$
+select concat('x', substring(lpad($2, 64, '0'), $1+49, 8))::bit(32)::bigint::dec*4294967296 + concat('x', substring(lpad($2, 64, '0'), $1+57, 8))::bit(32)::bigint::dec
+$$ language sql;
+
+create or replace function to_uint32 (pos int, data text) returns bigint immutable
+as $$
+select concat('x', substring(lpad($2, 64, '0'), $1+57, 8))::bit(32)::bigint
+$$ language sql;
+
+--drop function to_int128 (pos int, data text)
+
+create or replace function to_uint128 (pos int, data text) returns dec immutable
+as $$
+select concat('x', substring(lpad($2, 64, '0'), $1+33, 8))::bit(32)::bigint::dec*4294967296*4294967296*4294967296 + concat('x', substring(lpad($2, 64, '0'), $1+41, 8))::bit(32)::bigint::dec*4294967296*4294967296 + concat('x', substring(lpad($2, 64, '0'), $1+49, 8))::bit(32)::bigint::dec*4294967296 + concat('x', substring(lpad($2, 64, '0'), $1+57, 8))::bit(32)::bigint::dec
+$$ language sql;
+
 create or replace function strtol (data text, bits int) returns bigint immutable
 as $$
 select concat('x', substr(lpad(data, 64, '0'), 49, 64))::bit(64)::bigint
 $$ language sql;
-
--- select strtol('0000000000000000000000000000000000000000000000000000000000000020', 16);
-
--- select strtol('00000000000000000000000000000001', 16);
 
 create or replace function from_hex (data text)
   returns bytea
@@ -51,3 +73,24 @@ begin
     end loop;
     return res;
 end $$;
+
+/*select hex_to_numeric('0000000000000000000000000000000000000000000000010000000000000000');
+select hex_to_numeric('000000000000000000000000000000000000000000000001ffffffffffffffff');
+
+select hex, hex_to_numeric(hex)
+from   (
+         values ('ff'::text),
+           ('7fffffff'),
+           ('80000000'),
+           ('deadbeef'),
+           ('7fffffffffffffff'),
+           ('8000000000000000'),
+           ('ffffffffffffffff'),
+           ('ffffffffffffffff123'),
+           ('4540a085e7334d6494dd6a7378c579f6'),
+           ('0000000000000000000000000000000000000000000000000000000000000001'),
+           ('0000000000000000000000000000000000000000000000000000000000000010'),
+           ('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
+           ('ffffffff'),
+           ('1ffffffff')
+       ) t(hex);*/
