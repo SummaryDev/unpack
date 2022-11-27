@@ -6,10 +6,6 @@ as $$
 select length(ltrim(substring($2, $1+1, 32), '0')) = 0
 $$ language sql;
 
-002f55271aa02bb122a6fbeac695c06b9b4e4d2a
-
-2f55271aa02bb122a6fbeac695c06b9b4e4d2a69
-
 create or replace function to_decimal (pos int, data text) returns decimal immutable
 as $$
 select case when can_convert_to_decimal($1, $2) then to_uint128($1, $2) else null end
