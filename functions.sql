@@ -82,7 +82,7 @@ select case
        when $3 = 'uint128' then to_uint128($1, $2)::text
        when $3 = 'decimal' then to_decimal($1, $2)::text
        when $3 = 'bool' then case when to_bool($1, $2) then 'true' else 'false' end
-       else substring($2, $1+1, 64)
+       else quote_ident(substring($2, $1+1, 64))
        end
 $$ language sql;
 

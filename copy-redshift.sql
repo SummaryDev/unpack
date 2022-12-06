@@ -6,3 +6,4 @@ COPY dev.public.tokens FROM 's3://eth-etl-bq/bigquery-public-data:crypto_ethereu
 COPY dev.public.traces FROM 's3://eth-etl-bq/bigquery-public-data:crypto_ethereum.traces' GZIP IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS CSV DELIMITER ',' QUOTE '"' REGION AS 'eu-central-1' TRUNCATECOLUMNS;
 COPY dev.public.transactions FROM 's3://eth-etl-bq/bigquery-public-data:crypto_ethereum.transactions' GZIP IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS CSV DELIMITER ',' QUOTE '"' REGION AS 'eu-central-1' TRUNCATECOLUMNS;
 
+COPY dev.public.logs_a FROM 's3://aws-public-blockchain-copy' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;

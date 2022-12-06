@@ -4,7 +4,7 @@ creates functions based on redshift built it functions (and the lack of many)
 
 create or replace function to_part (pos int, data text, pos_part int, bits int) returns text immutable
 as $$
-select lpad(substring($2, $1 + 65 - ($3 + 1) * ($4/8)*2, ($4/8)*2), 64, '0')
+select substring($2, $1 + 65 - ($3 + 1) * ($4/8)*2, ($4/8)*2)
 $$ language sql;
 
 create or replace function to_positive (pos int, data text, pos_part int, bits int) returns bigint immutable

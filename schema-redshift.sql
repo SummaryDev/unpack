@@ -160,3 +160,38 @@ SORTKEY AUTO;
 --       and block_timestamp < '2020-01-01 12:00:00';
 --
 -- select topic0, data from logs where logs.address = '0xc12d1c73ee7dc3615ba4e37e4abfdbddfa38907e' and block_timestamp < '2020-12-01 01:00:00' limit 100;
+
+create schema eth;
+
+set search_path to eth;
+
+drop table if exists logs;
+
+CREATE TABLE logs (
+  address           VARCHAR(42)     NOT NULL, -- Address from which this log originated
+  topics            super, -- Indexed log arguments (0 to 4 32-byte hex strings). (In solidity: The first topic is the hash of the
+  data              varbinary(512000)  NOT NULL, -- Contains one or more 32 Bytes non-indexed arguments of the log
+  transaction_index BIGINT          NOT NULL, -- Integer of the transactions index position log was created from
+  log_index         BIGINT          NOT NULL, -- Integer of the log index position in the block
+  transaction_hash  VARCHAR(66)     NOT NULL, -- Hash of the transactions this log was created from
+  block_number      BIGINT          NOT NULL, -- The block number where this log was insignature of the event (e.g. Deposit(address,bytes32,uint256)),
+  block_hash        VARCHAR(66)     NOT NULL, -- Hash of the block where this log was in except you declared the event with the anonymous specifier,
+  block_timestamp   timestamp          NOT NULL,
+  date              varchar(10)     NOT NULL,
+  last_modified     timestamp          NOT NULL,
+  PRIMARY KEY (transaction_hash, log_index)
+)
+  DISTKEY (block_number)
+  SORTKEY AUTO;
+
+COPY dev.public.logs_a FROM 's3://aws-public-blockchain-copy' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+
+COPY dev.public.logs_a FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-01/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON
+
+select topics[1]::text from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
+
+select * from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
+
+
+
+select to_address(topics[1]::text) from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
