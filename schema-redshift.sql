@@ -186,12 +186,43 @@ CREATE TABLE logs (
 
 COPY dev.public.logs_a FROM 's3://aws-public-blockchain-copy' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
 
-COPY dev.public.logs_a FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-01/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-01/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-02/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-03/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-04/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-05/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-06/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-07/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-08/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-09/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-10/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-11/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-12/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-13/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-14/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-15/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-16/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-17/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-18/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-19/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-20/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-21/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-22/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-23/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-24/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-25/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-26/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-27/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-28/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-29/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-30/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
+COPY dev.public.logs FROM 's3://aws-public-blockchain-copy/logs/date=2020-01-31/' IAM_ROLE 'arn:aws:iam::729713441316:role/service-role/AmazonRedshift-CommandsAccessRole-20221031T131305' FORMAT AS PARQUET SERIALIZETOJSON;
 
 select topics[1]::text from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
 
+select topics[1]::text from logs where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
+
 select * from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
 
-
-
-select to_address(topics[1]::text) from logs_a where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
+select to_address(topics[1]::text) from logs where address = '0xdac17f958d2ee523a2206206994597c13d831ec7' limit 1;
